@@ -5,6 +5,7 @@ import RegisterPage from './pages/RegisterPage'
 import ScanPage from './pages/ScanPage'
 import ResultPage from './pages/ResultPage'
 import DiaryPage from './pages/DiaryPage'
+import NotFoundPage from './pages/NotFoundPage'
 
 function App() {
   return (
@@ -16,6 +17,7 @@ function App() {
         <Route path="/scan" element={<ScanPage />} />
         <Route path="/result" element={<ResultPage />} />
         <Route path="/diary" element={<DiaryPage />} />
+        <Route path="*" element={<NotFoundPage />} />
       </Routes>
     </BrowserRouter>
   )

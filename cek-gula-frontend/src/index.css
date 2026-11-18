@@ -1,20 +1,267 @@
 @import "tailwindcss";
 
-@media (max-width: 768px) {
-  .desktop-menu { display: none !important; }
-  .hamburger-btn { display: flex !important; }
-  .mobile-menu { display: flex !important; }
-  #hero { flex-direction: column !important; padding: 2rem 1.5rem !important; }
-  .hero-image { margin-top: 2rem; }
-  .hero-buttons { flex-direction: column !important; }
-  .fitur-grid { grid-template-columns: 1fr !important; }
-  .artikel-grid { grid-template-columns: 1fr !important; }
-  .tentang-wrapper { flex-direction: column !important; }
-  .footer-wrapper { flex-direction: column !important; gap: 2rem; }
-  .px-16 { padding-left: 1.5rem !important; padding-right: 1.5rem !important; }
+:root {
+  /* Design Tokens - Jajanan Pasar Indonesia (Tema Gula Aren & Bambu Tradisional) */
+  --bg-market: #FFF9EE;
+  --bg-market-subtle: #FFF2DD;
+  --bg-card: #FFFFFF;
+  --bg-dark-market: #241A12;
+  --bg-dark-card: #32251B;
+
+  /* Warna Dasar Utama: Cokelat Gula Aren / Merah Gula Jawa Hangat */
+  --color-primary: #8C4318;
+  --color-primary-hover: #A04E1D;
+  --color-primary-active: #5E2A0B;
+  --color-primary-light: #FDF1E8;
+
+  --color-gula-jawa: #B5451B;
+  --color-gula-merah: #7A4A21;
+  --color-gula-pekat: #5A3314;
+  
+  --color-kunyit: #F2B134;
+  --color-kunyit-hover: #DB981E;
+  --color-kunyit-light: #FEF7E6;
+  
+  --color-daun: #2E6B34;
+  --color-pandan: #4C8B3F;
+  --color-klepon-pink: #F4A6B7;
+  --color-ubi-ungu: #8E5BA8;
+  --color-telang-biru: #4A6FD1;
+
+  --color-text-main: #3B2A1A;
+  --color-text-muted: #745F4B;
+  --color-text-light: #9B8672;
+  
+  --color-bambu-border: #E6D7C3;
+  --color-bambu-shadow: rgba(122, 74, 33, 0.08);
+
+  --font-display: 'Fredoka', 'Baloo 2', cursive, sans-serif;
+  --font-body: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
-@media (min-width: 769px) {
-  .hamburger-btn { display: none !important; }
-  .mobile-menu { display: none !important; }
+/* Dark mode overrides: Nuansa Malam Pasar Tradisional */
+@media (prefers-color-scheme: dark) {
+  :root.auto-theme {
+    --bg-market: #1F1710;
+    --bg-market-subtle: #291F16;
+    --bg-card: #2B2117;
+    --color-text-main: #FDF4E7;
+    --color-text-muted: #D1BFA8;
+    --color-text-light: #A8957F;
+    --color-bambu-border: #4A3A2C;
+    --color-primary-light: #3D291C;
+    --color-kunyit-light: #3D3118;
+  }
+}
+
+.theme-dark {
+  --bg-market: #1F1710;
+  --bg-market-subtle: #291F16;
+  --bg-card: #2B2117;
+  --color-text-main: #FDF4E7;
+  --color-text-muted: #D1BFA8;
+  --color-text-light: #A8957F;
+  --color-bambu-border: #4A3A2C;
+  --color-primary-light: #3D291C;
+  --color-kunyit-light: #3D3118;
+}
+
+body {
+  font-family: var(--font-body);
+  background-color: var(--bg-market);
+  color: var(--color-text-main);
+  background-image: 
+    radial-gradient(#E8D5BC 0.75px, transparent 0.75px),
+    radial-gradient(#E8D5BC 0.75px, var(--bg-market) 0.75px);
+  background-size: 30px 30px;
+  background-position: 0 0, 15px 15px;
+  min-height: 100vh;
+}
+
+/* Display Font Class */
+.font-display {
+  font-family: var(--font-display);
+}
+
+.font-body {
+  font-family: var(--font-body);
+}
+
+/* Kanopi Tenda Lapak Pasar Tradisional (Stripes Gula Aren & Kertas Nasi) */
+.canopy-stripes {
+  background: repeating-linear-gradient(
+    45deg,
+    #8C4318,
+    #8C4318 18px,
+    #FFF4E0 18px,
+    #FFF4E0 36px
+  );
+}
+
+.canopy-stripes-festive {
+  background: repeating-linear-gradient(
+    -45deg,
+    #B5451B,
+    #B5451B 18px,
+    #FFF8EC 18px,
+    #FFF8EC 36px
+  );
+}
+
+.canopy-valance {
+  position: relative;
+}
+.canopy-valance::after {
+  content: '';
+  position: absolute;
+  bottom: -10px;
+  left: 0;
+  right: 0;
+  height: 12px;
+  background-size: 24px 12px;
+  background-repeat: repeat-x;
+  background-image: radial-gradient(circle at 12px 0px, transparent 11px, #8C4318 12px);
+}
+
+/* Anyaman Bambu Texture */
+.bamboo-pattern {
+  background-color: #F8EEDC;
+  background-image: 
+    linear-gradient(45deg, rgba(122, 74, 33, 0.05) 25%, transparent 25%, transparent 75%, rgba(122, 74, 33, 0.05) 75%, rgba(122, 74, 33, 0.05)),
+    linear-gradient(45deg, rgba(122, 74, 33, 0.05) 25%, transparent 25%, transparent 75%, rgba(122, 74, 33, 0.05) 75%, rgba(122, 74, 33, 0.05));
+  background-size: 16px 16px;
+  background-position: 0 0, 8px 8px;
+}
+
+/* Kartu Wadah Lapak Tradisional */
+.daun-card {
+  position: relative;
+  background-color: var(--bg-card);
+  border: 1.5px solid var(--color-bambu-border);
+  border-radius: 1.5rem;
+  box-shadow: 0 8px 24px var(--color-bambu-shadow), 0 2px 6px rgba(0,0,0,0.03);
+}
+
+/* Tombol Empuk Lapak (Warna Dasar Gula Aren Legit) */
+.btn-pasar-primary {
+  background-color: #8C4318;
+  color: #FFFFFF;
+  font-family: var(--font-display);
+  border-radius: 9999px;
+  box-shadow: 0 4px 0 #5E2A0B, 0 8px 16px rgba(140, 67, 24, 0.28);
+  transition: all 0.15s ease-in-out;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  min-height: 44px;
+}
+
+.btn-pasar-primary:hover {
+  background-color: #A04E1D;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 0 #5E2A0B, 0 10px 20px rgba(140, 67, 24, 0.35);
+}
+
+.btn-pasar-primary:active {
+  transform: translateY(2px);
+  box-shadow: 0 2px 0 #5E2A0B, 0 4px 8px rgba(140, 67, 24, 0.2);
+}
+
+.btn-pasar-secondary {
+  background-color: #FFF3DD;
+  color: #7A4A21;
+  border: 2px solid #E6D7C3;
+  font-family: var(--font-display);
+  border-radius: 9999px;
+  box-shadow: 0 3px 0 #D0BD9F;
+  transition: all 0.15s ease-in-out;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  min-height: 44px;
+}
+
+.btn-pasar-secondary:hover {
+  background-color: #FFECC4;
+  transform: translateY(-2px);
+  box-shadow: 0 5px 0 #D0BD9F;
+}
+
+.btn-pasar-secondary:active {
+  transform: translateY(1px);
+  box-shadow: 0 2px 0 #D0BD9F;
+}
+
+.btn-pasar-kunyit {
+  background-color: #F2B134;
+  color: #3B2A1A;
+  font-family: var(--font-display);
+  border-radius: 9999px;
+  box-shadow: 0 4px 0 #BF8319, 0 6px 14px rgba(242, 177, 52, 0.3);
+  transition: all 0.15s ease-in-out;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  min-height: 44px;
+}
+
+.btn-pasar-kunyit:hover {
+  background-color: #F7BF4F;
+  transform: translateY(-2px);
+}
+
+.btn-pasar-kunyit:active {
+  transform: translateY(2px);
+  box-shadow: 0 2px 0 #BF8319;
+}
+
+/* Struk / Papan Harga Pasar */
+.struk-pasar {
+  background-color: #FFFDF9;
+  border: 2px dashed #D6C2A7;
+  position: relative;
+}
+
+/* Hover miring empuk khas jajan pasar */
+.hover-jajan:hover {
+  transform: translateY(-4px) rotate(-1deg);
+  box-shadow: 0 12px 28px rgba(122, 74, 33, 0.14);
+}
+
+.hover-jajan-right:hover {
+  transform: translateY(-4px) rotate(1deg);
+  box-shadow: 0 12px 28px rgba(122, 74, 33, 0.14);
+}
+
+/* Animasi kukusan berputar / pulsing */
+@keyframes tampah-spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes kukusan-steam {
+  0% { transform: translateY(0) scale(0.9); opacity: 0.2; }
+  50% { transform: translateY(-10px) scale(1.1); opacity: 0.8; }
+  100% { transform: translateY(-20px) scale(1.2); opacity: 0; }
+}
+
+.animate-steam {
+  animation: kukusan-steam 2s infinite ease-out;
+}
+
+.animate-tampah-spin {
+  animation: tampah-spin 12s linear infinite;
+}
+
+/* Accessibility: prefers-reduced-motion */
+@media (prefers-reduced-motion: reduce) {
+  *, ::before, ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

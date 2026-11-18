@@ -1,7 +1,9 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { FaEye, FaEyeSlash } from 'react-icons/fa'
+import { FaEye, FaEyeSlash, FaUserPlus } from 'react-icons/fa'
+import { MdStorefront, MdWarning, MdArrowBack } from 'react-icons/md'
 import { registerUser } from '../services/api'
+import { DaunPisangCorner } from '../components/JajananArt'
 
 function RegisterPage() {
   const navigate = useNavigate()
@@ -23,23 +25,23 @@ function RegisterPage() {
 
   const handleSubmit = async () => {
     if (!form.name || !form.email || !form.password || !form.confirmPassword) {
-      setError('Semua data wajib diisi ya.')
+      setError('Semua data wajib diisi ya, Bu/Pak.')
       return
     }
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
     if (!emailRegex.test(form.email)) {
-      setError('Format email kamu sepertinya salah.')
+      setError('Format email kamu sepertinya kurang pas (contoh: nama@email.com).')
       return
     }
 
     if (form.password.length < 8) {
-      setError('Password harus minimal 8 karakter.')
+      setError('Kata sandi harus minimal 8 karakter agar aman.')
       return
     }
 
     if (form.password !== form.confirmPassword) {
-      setError('Password dan konfirmasi tidak cocok.')
+      setError('Kata sandi dan konfirmasi kata sandi belum sama.')
       return
     }
 
@@ -54,119 +56,163 @@ function RegisterPage() {
       })
       navigate('/login')
     } catch (err) {
-      setError(err.message)
+      setError(err.message || 'Pendaftaran gagal. Silakan coba lagi.')
     } finally {
       setLoading(false)
     }
   }
 
   return (
-    <div className="min-h-screen bg-[#f0f7f0] flex items-center justify-center px-4 py-12 font-sans">
-      <div className="bg-white rounded-3xl shadow-xl p-10 w-full max-w-md border border-green-50">
+    <div className="min-h-screen font-body text-[#3B2A1A] flex flex-col justify-between">
+      {/* Kanopi Tenda Lapak */}
+      <div className="canopy-stripes h-2.5 w-full border-b border-[#5E2A0B]"></div>
 
-        <div className="text-center mb-8">
-          <div className="bg-green-700 text-white w-16 h-16 rounded-2xl flex items-center justify-center text-3xl mx-auto mb-4 shadow-lg shadow-green-100">
-            🍃
-          </div>
-          <h1 className="text-green-800 font-black text-3xl tracking-tight">Cek-Gula</h1>
-          <p className="text-gray-500 text-sm mt-2">Daftar sekarang untuk mulai memantau gulamu</p>
-        </div>
-
-        {error && (
-          <div className="bg-red-50 border-l-4 border-red-500 text-red-700 text-sm px-4 py-3 rounded-lg mb-6">
-            <span className="font-bold">Perhatian:</span> {error}
-          </div>
-        )}
-
-        <div className="space-y-4">
-          <div>
-            <label className="text-xs text-gray-500 font-bold uppercase tracking-wider ml-1">Nama Lengkap</label>
-            <input
-              type="text"
-              name="name"
-              value={form.name}
-              onChange={handleChange}
-              placeholder="Contoh: Budi Santoso"
-              className="w-full mt-1.5 px-5 py-3 border border-gray-100 bg-gray-50 rounded-2xl focus:outline-none focus:ring-2 focus:ring-green-400 focus:bg-white transition-all text-sm"
-            />
-          </div>
-
-          <div>
-            <label className="text-xs text-gray-500 font-bold uppercase tracking-wider ml-1">Email</label>
-            <input
-              type="email"
-              name="email"
-              value={form.email}
-              onChange={handleChange}
-              placeholder="nama@email.com"
-              className="w-full mt-1.5 px-5 py-3 border border-gray-100 bg-gray-50 rounded-2xl focus:outline-none focus:ring-2 focus:ring-green-400 focus:bg-white transition-all text-sm"
-            />
-          </div>
-
-          <div>
-            <label className="text-xs text-gray-500 font-bold uppercase tracking-wider ml-1">Password</label>
-            <div className="relative mt-1.5">
-              <input
-                type={showPassword ? 'text' : 'password'}
-                name="password"
-                value={form.password}
-                onChange={handleChange}
-                placeholder="Minimal 8 karakter"
-                className="w-full px-5 py-3 border border-gray-100 bg-gray-50 rounded-2xl focus:outline-none focus:ring-2 focus:ring-green-400 focus:bg-white transition-all text-sm pr-14"
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-green-600 transition p-1">
-                {showPassword ? <FaEyeSlash size={20} /> : <FaEye size={20} />}
-              </button>
-            </div>
-          </div>
-
-          <div>
-            <label className="text-xs text-gray-500 font-bold uppercase tracking-wider ml-1">Konfirmasi Password</label>
-            <div className="relative mt-1.5">
-              <input
-                type={showConfirm ? 'text' : 'password'}
-                name="confirmPassword"
-                value={form.confirmPassword}
-                onChange={handleChange}
-                placeholder="Ketik ulang password"
-                className="w-full px-5 py-3 border border-gray-100 bg-gray-50 rounded-2xl focus:outline-none focus:ring-2 focus:ring-green-400 focus:bg-white transition-all text-sm pr-14"
-              />
-              <button
-                type="button"
-                onClick={() => setShowConfirm(!showConfirm)}
-                className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-green-600 transition p-1">
-                {showConfirm ? <FaEyeSlash size={20} /> : <FaEye size={20} />}
-              </button>
-            </div>
-          </div>
-
+      <div className="flex-1 flex flex-col items-center justify-center px-4 py-8">
+        <div className="w-full max-w-md mb-3 flex justify-start">
           <button
-            onClick={handleSubmit}
-            disabled={loading}
-            className="w-full bg-green-700 text-white py-4 rounded-2xl font-bold text-lg hover:bg-green-800 active:scale-[0.98] transition-all mt-6 disabled:opacity-70 shadow-lg shadow-green-100 flex items-center justify-center">
-            {loading ? (
-              <span className="flex items-center gap-2">
-                <svg className="animate-spin h-5 w-5 text-white" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
-                Mendaftarkan...
-              </span>
-            ) : 'Buat Akun'}
+            type="button"
+            onClick={() => navigate(-1)}
+            className="inline-flex items-center gap-2 text-xs sm:text-sm font-display font-bold text-[#8C4318] hover:text-[#5E2A0B] bg-[#FFFDF9] border border-[#D8C2A4] px-4 py-2 rounded-full shadow-xs hover:bg-[#FFF3DD] transition cursor-pointer min-h-[44px]"
+          >
+            <MdArrowBack size={18} />
+            <span>Kembali</span>
           </button>
         </div>
 
-        <p className="text-center text-sm text-gray-400 mt-8 font-medium">
-          Sudah punya akun?{' '}
-          <button
-            onClick={() => navigate('/login')}
-            className="text-green-600 font-bold hover:text-green-800 hover:underline transition">
-            Masuk di sini
-          </button>
-        </p>
+        <div className="w-full max-w-md daun-card p-8 sm:p-10 relative overflow-hidden bg-[#FFFDF9] shadow-2xl">
+          <DaunPisangCorner position="top-right" />
+
+          {/* Header Lapak */}
+          <div className="text-center mb-8">
+            <div 
+              onClick={() => navigate('/')} 
+              className="w-16 h-16 rounded-2xl bg-[#8C4318] border-2 border-[#D8A868] text-white flex items-center justify-center mx-auto mb-3 shadow-md cursor-pointer hover:scale-105 transition-transform"
+            >
+              <MdStorefront size={32} />
+            </div>
+            <h1 className="font-display font-black text-3xl text-[#8C4318] tracking-tight">
+              Daftar Lapak Cek-Gula
+            </h1>
+            <p className="text-xs font-semibold text-[#745F4B] mt-1">
+              Bikin akun belanja sehat untuk kontrol gula darahmu
+            </p>
+          </div>
+
+          {/* Pesan Kesalahan */}
+          {error && (
+            <div className="bg-[#FDEEE9] border-2 border-[#B5451B] text-[#B5451B] text-xs font-semibold px-4 py-3 rounded-2xl mb-6 flex items-center gap-2">
+              <MdWarning size={18} className="shrink-0" />
+              <span>{error}</span>
+            </div>
+          )}
+
+          <div className="space-y-4">
+            <div>
+              <label className="text-xs text-[#7A4A21] font-display font-bold uppercase tracking-wider block mb-1">
+                Nama Lengkap
+              </label>
+              <input
+                type="text"
+                name="name"
+                value={form.name}
+                onChange={handleChange}
+                placeholder="Contoh: Siti Rahmawati"
+                className="w-full px-4 py-3 bg-[#FFF8EC] border border-[#D8C2A4] rounded-2xl text-sm font-medium text-[#3B2A1A] placeholder:text-[#A89582] focus:outline-none focus:ring-2 focus:ring-[#8C4318] focus:bg-white transition"
+              />
+            </div>
+
+            <div>
+              <label className="text-xs text-[#7A4A21] font-display font-bold uppercase tracking-wider block mb-1">
+                Alamat Email
+              </label>
+              <input
+                type="email"
+                name="email"
+                value={form.email}
+                onChange={handleChange}
+                placeholder="nama@email.com"
+                className="w-full px-4 py-3 bg-[#FFF8EC] border border-[#D8C2A4] rounded-2xl text-sm font-medium text-[#3B2A1A] placeholder:text-[#A89582] focus:outline-none focus:ring-2 focus:ring-[#8C4318] focus:bg-white transition"
+              />
+            </div>
+
+            <div>
+              <label className="text-xs text-[#7A4A21] font-display font-bold uppercase tracking-wider block mb-1">
+                Kata Sandi (Minimal 8 karakter)
+              </label>
+              <div className="relative">
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  name="password"
+                  value={form.password}
+                  onChange={handleChange}
+                  placeholder="Minimal 8 karakter"
+                  className="w-full px-4 py-3 bg-[#FFF8EC] border border-[#D8C2A4] rounded-2xl text-sm font-medium text-[#3B2A1A] placeholder:text-[#A89582] focus:outline-none focus:ring-2 focus:ring-[#8C4318] focus:bg-white transition pr-12"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-[#745F4B] hover:text-[#8C4318] p-1"
+                  aria-label={showPassword ? 'Sembunyikan password' : 'Tampilkan password'}
+                >
+                  {showPassword ? <FaEyeSlash size={18} /> : <FaEye size={18} />}
+                </button>
+              </div>
+            </div>
+
+            <div>
+              <label className="text-xs text-[#7A4A21] font-display font-bold uppercase tracking-wider block mb-1">
+                Ulangi Kata Sandi
+              </label>
+              <div className="relative">
+                <input
+                  type={showConfirm ? 'text' : 'password'}
+                  name="confirmPassword"
+                  value={form.confirmPassword}
+                  onChange={handleChange}
+                  placeholder="Ketik ulang kata sandi"
+                  className="w-full px-4 py-3 bg-[#FFF8EC] border border-[#D8C2A4] rounded-2xl text-sm font-medium text-[#3B2A1A] placeholder:text-[#A89582] focus:outline-none focus:ring-2 focus:ring-[#8C4318] focus:bg-white transition pr-12"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirm(!showConfirm)}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-[#745F4B] hover:text-[#8C4318] p-1"
+                  aria-label={showConfirm ? 'Sembunyikan konfirmasi' : 'Tampilkan konfirmasi'}
+                >
+                  {showConfirm ? <FaEyeSlash size={18} /> : <FaEye size={18} />}
+                </button>
+              </div>
+            </div>
+
+            <button
+              onClick={handleSubmit}
+              disabled={loading}
+              className="w-full btn-pasar-primary py-3.5 text-base font-bold shadow-lg mt-6 disabled:opacity-60 flex items-center justify-center gap-2"
+            >
+              {loading ? (
+                <span>Mendaftarkan ke buku lapak...</span>
+              ) : (
+                <>
+                  <FaUserPlus size={18} />
+                  <span>Bikin Akun Sekarang</span>
+                </>
+              )}
+            </button>
+          </div>
+
+          <div className="mt-8 pt-6 border-t border-dashed border-[#D8C2A4] text-center text-xs text-[#745F4B]">
+            Sudah punya akun?{' '}
+            <button
+              onClick={() => navigate('/login')}
+              className="text-[#8C4318] font-display font-bold hover:underline ml-1"
+            >
+              Masuk di sini
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div className="text-center py-4 text-xs text-[#A89582]">
+        © 2026 Cek-Gula Jajanan Pasar Indonesia
       </div>
     </div>
   )
