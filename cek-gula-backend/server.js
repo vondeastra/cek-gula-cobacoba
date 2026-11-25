@@ -17,11 +17,28 @@ const PORT = process.env.PORT || 3000;
 const uploadsDir = path.join(__dirname, "uploads");
 if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir);
 
-// Middleware
+// Konfigurasi CORS yang fleksibel
+const allowedOrigins = [
+  "http://localhost:5173",
+  "http://localhost:5174",
+  "http://127.0.0.1:5173",
+  "http://127.0.0.1:5174",
+  "https://cek-gula.vercel.app",
+  process.env.CLIENT_URL
+].filter(Boolean);
+
 app.use(cors({
-  origin: ["http://localhost:5173", "http://localhost:5174", "https://cek-gula.vercel.app", "https://cek-gula-mg09s5nui-laurentcynthiacasandra-specs-projects.vercel.app"],
+  origin: (origin, callback) => {
+    // Izinkan permintaan tanpa origin (seperti Postman, mobile app, atau curl)
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.indexOf(origin) !== -1 || origin.endsWith(".vercel.app")) {
+      return callback(null, true);
+    }
+    return callback(null, true); // Toleran untuk development
+  },
   credentials: true,
 }));
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));

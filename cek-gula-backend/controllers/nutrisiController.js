@@ -4,15 +4,22 @@ const { analyzeGula, estimateKadarGula } = require("../services/aiService");
 // GET /api/nutrisi?q=bakwan
 const searchNutrisi = async (req, res) => {
   try {
-    const q = req.query.q || "";
-    if (!q.trim())
+    const q = (req.query.q || "").trim();
+    if (!q)
       return res.status(400).json({ status: "error", message: "Parameter q wajib diisi." });
 
     const result = await pool.query(
       `SELECT * FROM nutrisi
        WHERE LOWER(nama_makanan) LIKE LOWER($1)
-       ORDER BY nama_makanan LIMIT 20`,
-      [`%${q}%`]
+       ORDER BY 
+         CASE 
+           WHEN LOWER(nama_makanan) = LOWER($2) THEN 1 
+           WHEN LOWER(nama_makanan) LIKE LOWER($3) THEN 2 
+           ELSE 3 
+         END, 
+         nama_makanan ASC 
+       LIMIT 20`,
+      [`%${q}%`, q, `${q}%`]
     );
 
     const data = result.rows.map(item => ({

@@ -22,17 +22,29 @@ const getAllGula = async (req, res) => {
 const createGula = async (req, res) => {
   try {
     const { nama, kadarGula } = req.body;
+    const cleanNama = (nama || "").trim();
 
-    if (!nama || kadarGula === undefined)
+    if (!cleanNama || kadarGula === undefined)
       return res.status(400).json({ status: "error", message: "Nama dan kadar gula wajib diisi." });
 
     const status      = analyzeGula(Number(kadarGula));
-    const rekomendasi = getRekomendasi(status, nama);
+    const rekomendasi = getRekomendasi(status, cleanNama);
 
-    // Cari nutrisi dari dataset
+    // Cari nutrisi dari dataset: prioritaskan nama yang sama persis, jika tidak ada cari substring
+    const cleanLower = cleanNama.toLowerCase();
     const nutrisiRow = await pool.query(
-      "SELECT * FROM nutrisi WHERE LOWER(nama_makanan) = LOWER($1) LIMIT 1",
-      [nama]
+      `SELECT * FROM nutrisi 
+       WHERE LOWER(nama_makanan) = $1 
+          OR LOWER(nama_makanan) LIKE $2
+       ORDER BY 
+         CASE 
+           WHEN LOWER(nama_makanan) = $1 THEN 1 
+           WHEN LOWER(nama_makanan) LIKE $3 THEN 2
+           ELSE 3 
+         END,
+         nama_makanan ASC
+       LIMIT 1`,
+      [cleanLower, `%${cleanLower}%`, `${cleanLower}%`]
     );
 
     let kalori        = null;
@@ -60,7 +72,7 @@ const createGula = async (req, res) => {
          (user_id, nama_makanan, kadar_gula, status, kalori, image_url, nutrisi_detail)
        VALUES ($1,$2,$3,$4,$5,$6,$7)
        RETURNING *`,
-      [req.user.id, nama, Number(kadarGula), status, kalori, imageUrl, JSON.stringify(nutrisiDetail)]
+      [req.user.id, cleanNama, Number(kadarGula), status, kalori, imageUrl, JSON.stringify(nutrisiDetail)]
     );
 
     const saved = result.rows[0];
@@ -103,10 +115,10 @@ const getDashboard = async (req, res) => {
     res.json({
       status: "success",
       data: {
-        total:       parseInt(s.total),
-        normal:      parseInt(s.normal),
-        tinggi:      parseInt(s.tinggi),
-        rendah:      parseInt(s.rendah),
+        total:       parseInt(s.total) || 0,
+        normal:      parseInt(s.normal) || 0,
+        tinggi:      parseInt(s.tinggi) || 0,
+        rendah:      parseInt(s.rendah) || 0,
         rataRataGula: s.rata_rata_gula || "0.0",
         totalKalori:  s.total_kalori   || "0.0",
       },

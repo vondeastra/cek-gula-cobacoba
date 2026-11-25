@@ -1,6 +1,6 @@
-import { useState, useRef } from 'react'
+import { useState, useRef, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { FaCamera, FaTag } from 'react-icons/fa'
+import { FaCamera, FaTag, FaCheck } from 'react-icons/fa'
 import { 
   MdStorefront, 
   MdMenuBook, 
@@ -10,12 +10,34 @@ import {
   MdLightbulb, 
   MdCheckCircle, 
   MdFactCheck,
-  MdArrowBack
+  MdArrowBack,
+  MdSearch,
+  MdEdit,
+  MdClose,
+  MdRestaurantMenu
 } from 'react-icons/md'
 import { createGula, searchNutrisi, addDiary } from '../services/api'
+import { DATASET_NUTRISI } from '../services/datasetNutrisi.js'
 import { KukusanLoadingSvg, DaunPisangCorner } from '../components/JajananArt'
 
-const AI_API_URL = 'https://aulian12-model-cek-gula.hf.space/predict'
+const AI_API_URL = (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_AI_API_URL) 
+  ? import.meta.env.VITE_AI_API_URL 
+  : 'https://aulian12-model-cek-gula.hf.space/predict'
+
+const JAJANAN_POPULER = [
+  'klepon',
+  'dadar gulung',
+  'onde-onde',
+  'bakwan',
+  'lemper',
+  'lumpia',
+  'bika ambon',
+  'risol',
+  'serabi',
+  'kue cucur',
+  'lapis legit',
+  'pisang goreng'
+]
 
 function ScanPage() {
   const navigate = useNavigate()
@@ -26,12 +48,34 @@ function ScanPage() {
   const [error, setError] = useState('')
   const [aiResult, setAiResult] = useState(null)
   const [predicting, setPredicting] = useState(false)
+  const [manualMode, setManualMode] = useState(false)
+  const [searchKeyword, setSearchKeyword] = useState('')
   const fileInputRef = useRef(null)
 
   const handleLogout = () => {
     localStorage.removeItem('token')
     localStorage.removeItem('user')
     navigate('/login')
+  }
+
+  // Filter daftar jajanan untuk pemilihan manual
+  const filteredJajanan = useMemo(() => {
+    const q = searchKeyword.trim().toLowerCase()
+    if (!q) return DATASET_NUTRISI
+    return DATASET_NUTRISI.filter(item => 
+      item.nama_makanan.toLowerCase().includes(q)
+    )
+  }, [searchKeyword])
+
+  const handleSelectManual = (item) => {
+    setAiResult({
+      prediction: item.nama_makanan,
+      confidence: 100,
+      rekomendasi: `Pilihan manual (${item.nama_makanan}). Takaran gizi dan indeks glikemik diambil dari database gizi standar.`,
+      isManual: true,
+    })
+    setError('')
+    setManualMode(false)
   }
 
   const handleFileChange = async (e) => {
@@ -47,10 +91,17 @@ function ScanPage() {
       const formData = new FormData()
       formData.append('file', file)
       const response = await fetch(AI_API_URL, { method: 'POST', body: formData })
+      if (!response.ok) throw new Error(`Status ${response.status}`)
       const data = await response.json()
-      setAiResult({ prediction: data.prediction, confidence: data.confidence, rekomendasi: data.rekomendasi_ai })
+      setAiResult({ 
+        prediction: data.prediction, 
+        confidence: data.confidence, 
+        rekomendasi: data.rekomendasi_ai,
+        isManual: false
+      })
     } catch {
-      setError('Waduh, koneksi ke tukang tilik AI terganggu. Silakan coba unggah foto ulang ya.')
+      setError('Koneksi ke server AI sedang tidak aktif. Jangan khawatir, silakan pilih jenis jajananmu secara manual di bawah!')
+      setManualMode(true)
     } finally {
       setPredicting(false)
     }
@@ -59,7 +110,7 @@ function ScanPage() {
   const handleAnalyze = async () => {
     const namaFinal = aiResult?.prediction || ''
     if (!namaFinal) {
-      setError('AI belum mengenali jajanannya. Ayo pilih atau jepret foto jajanan pasarmu dulu.')
+      setError('Belum ada jajanan yang dipilih. Jepret foto atau pilih jajanan dari daftar pasar dulu.')
       return
     }
     setScanning(true)
@@ -88,7 +139,7 @@ function ScanPage() {
         confidence: aiResult?.confidence,
       }
       setHasil(hasilFinal)
-      setTimeout(() => navigate('/result', { state: hasilFinal }), 1200)
+      setTimeout(() => navigate('/result', { state: hasilFinal }), 1000)
     } catch (err) {
       setError(err.message || 'Gagal menyimpan dan menakar jajanan.')
     } finally {
@@ -183,11 +234,13 @@ function ScanPage() {
           </p>
         </div>
 
-        {/* Pesan Kesalahan / Error */}
+        {/* Pesan Kesalahan / Peringatan */}
         {error && (
-          <div className="w-full mb-4 bg-[#FDEEE9] border-2 border-[#B5451B] text-[#B5451B] text-xs font-semibold px-4 py-3 rounded-2xl flex items-center gap-2 shadow-sm">
-            <MdWarning size={18} className="shrink-0" />
-            <span>{error}</span>
+          <div className="w-full mb-4 bg-[#FDEEE9] border-2 border-[#B5451B] text-[#B5451B] text-xs font-semibold px-4 py-3 rounded-2xl flex items-start gap-2 shadow-sm">
+            <MdWarning size={18} className="shrink-0 mt-0.5" />
+            <div className="flex-1">
+              <span>{error}</span>
+            </div>
           </div>
         )}
 
@@ -195,7 +248,7 @@ function ScanPage() {
         <div 
           onClick={() => !scanning && !predicting && fileInputRef.current.click()}
           className="w-full daun-card overflow-hidden cursor-pointer relative transition-all group hover-jajan"
-          style={{ height: '320px' }}
+          style={{ height: '300px' }}
         >
           <DaunPisangCorner position="top-right" />
           
@@ -219,7 +272,7 @@ function ScanPage() {
               </p>
               <div className="mt-4 inline-flex items-center gap-1.5 bg-[#FFF8EC] text-[#7A4A21] font-display text-xs font-semibold px-3 py-1 rounded-full border border-[#D8C2A4]">
                 <FaTag size={10} />
-                <span>JPG, PNG • Ukuran wajar</span>
+                <span>JPG, PNG • Maks 10MB</span>
               </div>
             </div>
           )}
@@ -246,20 +299,27 @@ function ScanPage() {
           className="hidden" 
         />
 
-        {/* Hasil Deteksi AI */}
+        {/* Hasil Deteksi AI / Pilihan Manual */}
         {aiResult && !predicting && (
-          <div className="w-full mt-4 bg-[#FFFDF9] border-2 border-[#8C4318] rounded-2xl p-4 shadow-md relative overflow-hidden">
+          <div className="w-full mt-4 bg-[#FFFDF9] border-2 border-[#8C4318] rounded-2xl p-4 shadow-md relative overflow-hidden animate-fadeIn">
             <div className="flex items-start gap-3">
               <div className="w-10 h-10 rounded-xl bg-[#FEF5E7] border border-[#E8C589] flex items-center justify-center text-[#8C4318] shrink-0">
                 <FaTag size={18} />
               </div>
               <div className="flex-1">
                 <div className="flex items-center justify-between flex-wrap gap-1">
-                  <p className="font-display font-black text-lg text-[#8C4318] capitalize">
-                    {aiResult.prediction}
-                  </p>
+                  <div className="flex items-center gap-2">
+                    <p className="font-display font-black text-lg text-[#8C4318] capitalize">
+                      {aiResult.prediction}
+                    </p>
+                    {aiResult.isManual && (
+                      <span className="bg-[#FEF5E7] text-[#8C4318] text-[10px] font-bold px-2 py-0.5 rounded-full border border-[#F2B134]">
+                        Manual
+                      </span>
+                    )}
+                  </div>
                   <span className="bg-[#FEF5E7] text-[#8C4318] font-display font-bold text-xs px-2.5 py-0.5 rounded-full border border-[#E8C589]">
-                    Keyakinan: {aiResult.confidence ? aiResult.confidence.toFixed(1) : 0}%
+                    Keyakinan: {aiResult.confidence ? aiResult.confidence.toFixed(1) : 100}%
                   </span>
                 </div>
                 
@@ -269,7 +329,103 @@ function ScanPage() {
                     <span>"{aiResult.rekomendasi}"</span>
                   </p>
                 )}
+
+                {/* Tombol Ganti Jajanan jika AI salah tebak */}
+                <button
+                  type="button"
+                  onClick={() => setManualMode(!manualMode)}
+                  className="mt-3 text-xs font-display font-bold text-[#8C4318] hover:text-[#B5451B] flex items-center gap-1.5 transition underline decoration-dotted"
+                >
+                  <MdEdit size={14} />
+                  <span>Bukan jajanan ini? Ganti jajanan dari daftar</span>
+                </button>
               </div>
+            </div>
+          </div>
+        )}
+
+        {/* Panel Pemilihan Manual dari 100 Jajanan Pasar */}
+        {manualMode && (
+          <div className="w-full mt-4 bg-[#FFFDF9] border-2 border-[#D8C2A4] rounded-2xl p-4 shadow-md animate-fadeIn">
+            <div className="flex justify-between items-center mb-3">
+              <div className="flex items-center gap-2">
+                <MdRestaurantMenu size={18} className="text-[#8C4318]" />
+                <h3 className="font-display font-bold text-sm text-[#3B2A1A]">
+                  Pilih Jajanan Pasar ({DATASET_NUTRISI.length} Pilihan)
+                </h3>
+              </div>
+              <button 
+                onClick={() => setManualMode(false)}
+                className="text-[#745F4B] hover:text-[#B5451B] p-1 rounded-lg"
+              >
+                <MdClose size={18} />
+              </button>
+            </div>
+
+            {/* Input Pencarian */}
+            <div className="relative mb-3">
+              <MdSearch size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#745F4B]" />
+              <input
+                type="text"
+                value={searchKeyword}
+                onChange={(e) => setSearchKeyword(e.target.value)}
+                placeholder="Ketik nama jajanan (misal: klepon, bakwan, lemper)..."
+                className="w-full pl-9 pr-3 py-2 text-xs bg-[#FFF8EC] border border-[#E8D9C5] rounded-xl focus:outline-none focus:ring-2 focus:ring-[#8C4318]"
+              />
+            </div>
+
+            {/* Rekomendasi Cepat / Jajanan Populer */}
+            {!searchKeyword && (
+              <div className="mb-3">
+                <p className="text-[11px] font-display font-bold text-[#745F4B] mb-1.5">
+                  Populer di Lapak:
+                </p>
+                <div className="flex flex-wrap gap-1.5">
+                  {JAJANAN_POPULER.map(nama => (
+                    <button
+                      key={nama}
+                      type="button"
+                      onClick={() => {
+                        const item = DATASET_NUTRISI.find(n => n.nama_makanan.toLowerCase() === nama.toLowerCase())
+                        if (item) handleSelectManual(item)
+                      }}
+                      className="text-[11px] bg-[#FFF8EC] hover:bg-[#F2B134] hover:text-[#3B2A1A] text-[#7A4A21] px-2.5 py-1 rounded-full border border-[#D8C2A4] capitalize font-medium transition cursor-pointer"
+                    >
+                      {nama}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* List Jajanan Hasil Pencarian */}
+            <div className="max-h-48 overflow-y-auto space-y-1.5 pr-1 custom-scrollbar">
+              {filteredJajanan.length === 0 ? (
+                <p className="text-xs text-[#745F4B] text-center py-4 italic">
+                  Jajanan "{searchKeyword}" tidak ditemukan di lapak.
+                </p>
+              ) : (
+                filteredJajanan.map(item => (
+                  <div
+                    key={item.nama_makanan}
+                    onClick={() => handleSelectManual(item)}
+                    className="p-2.5 bg-[#FFF8EC] hover:bg-[#FEF5E7] border border-[#E8D9C5] hover:border-[#8C4318] rounded-xl flex items-center justify-between cursor-pointer transition text-xs group"
+                  >
+                    <div>
+                      <span className="font-display font-bold text-[#3B2A1A] capitalize block">
+                        {item.nama_makanan}
+                      </span>
+                      <span className="text-[10px] text-[#745F4B]">
+                        Kalori: {item.kalori_kkal} kkal • Gula: {item.gula_g}g
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-1 text-[11px] font-bold text-[#8C4318] opacity-0 group-hover:opacity-100 transition">
+                      <span>Pilih</span>
+                      <FaCheck size={10} />
+                    </div>
+                  </div>
+                ))
+              )}
             </div>
           </div>
         )}
@@ -286,29 +442,42 @@ function ScanPage() {
         <div className="w-full mt-4 bg-[#FFF9EE] border border-[#EAD5BC] rounded-2xl p-3.5 flex items-start gap-2.5 text-xs text-[#745F4B]">
           <MdLightbulb size={18} className="text-[#F2B134] shrink-0 mt-0.5" />
           <div>
-            <strong className="text-[#7A4A21] font-display">Petunjuk Jajan Sehat:</strong> Pastikan foto jelas, fokus pada kue, dan tidak tertutup plastik buram agar AI mudah menakar gizinya.
+            <strong className="text-[#7A4A21] font-display">Petunjuk Jajan Sehat:</strong> Pastikan foto jelas dan fokus pada kue. Anda juga dapat memilih langsung jajanan dari daftar bila server AI sedang offline.
           </div>
         </div>
 
-        {/* Tombol Aksi */}
+        {/* Tombol Aksi Utama: Analisis */}
         {aiResult && !scanning && !predicting && (
           <button 
             onClick={handleAnalyze} 
-            className="w-full mt-6 btn-pasar-primary py-4 text-base font-bold shadow-xl flex items-center justify-center gap-2.5"
+            className="w-full mt-6 btn-pasar-primary py-4 text-base font-bold shadow-xl flex items-center justify-center gap-2.5 cursor-pointer active:scale-98 transition"
           >
             <MdFactCheck size={18} />
             <span>Timbang Manisnya & Lihat Hasil</span>
           </button>
         )}
 
-        {!image && !predicting && (
-          <button 
-            onClick={() => fileInputRef.current.click()} 
-            className="w-full mt-6 btn-pasar-secondary py-3.5 text-sm font-bold flex items-center justify-center gap-2"
-          >
-            <FaCamera size={16} />
-            <span>Buka Kamera / Galeri Ponsel</span>
-          </button>
+        {/* Tombol Buka Kamera / Galeri */}
+        {!predicting && (
+          <div className="w-full mt-4 flex flex-col sm:flex-row gap-2.5">
+            <button 
+              onClick={() => fileInputRef.current.click()} 
+              className="flex-1 btn-pasar-secondary py-3 text-xs font-bold flex items-center justify-center gap-2 cursor-pointer"
+            >
+              <FaCamera size={14} />
+              <span>{image ? 'Ganti Foto Jajanan' : 'Buka Kamera / Galeri'}</span>
+            </button>
+
+            {!manualMode && (
+              <button 
+                onClick={() => setManualMode(true)} 
+                className="flex-1 bg-[#FFFDF9] border border-[#8C4318] text-[#8C4318] hover:bg-[#FEF5E7] py-3 text-xs font-bold rounded-2xl flex items-center justify-center gap-2 cursor-pointer transition shadow-xs"
+              >
+                <MdRestaurantMenu size={16} />
+                <span>Pilih Manual dari 100 Kue</span>
+              </button>
+            )}
+          </div>
         )}
 
       </div>

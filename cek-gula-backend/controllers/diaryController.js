@@ -1,9 +1,26 @@
 const pool = require("../config/db");
 
+// Helper untuk menghasilkan tanggal lokal (YYYY-MM-DD) yang akurat sesuai zona waktu lokal
+const getLocalDateString = () => {
+  const d = new Date();
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+};
+
+// Helper untuk menghasilkan jam lokal (HH:mm)
+const getLocalTimeString = () => {
+  const d = new Date();
+  const hours = String(d.getHours()).padStart(2, "0");
+  const minutes = String(d.getMinutes()).padStart(2, "0");
+  return `${hours}:${minutes}`;
+};
+
 // GET /api/diary?date=YYYY-MM-DD
 const getDiary = async (req, res) => {
   try {
-    const tanggal = req.query.date || new Date().toISOString().split("T")[0];
+    const tanggal = req.query.date || getLocalDateString();
 
     const result = await pool.query(
       `SELECT id,
@@ -40,8 +57,9 @@ const getDiary = async (req, res) => {
 const addDiary = async (req, res) => {
   try {
     const { scan_id, nama_makanan, kadar_gula, kalori, status, time_eaten, diary_date } = req.body;
+    const cleanFoodName = (nama_makanan || "").trim();
 
-    if (!nama_makanan)
+    if (!cleanFoodName)
       return res.status(400).json({ status: "error", message: "Nama makanan wajib diisi." });
 
     const result = await pool.query(
@@ -52,12 +70,12 @@ const addDiary = async (req, res) => {
       [
         req.user.id,
         scan_id    || null,
-        nama_makanan,
-        kadar_gula || 0,
-        kalori     || 0,
+        cleanFoodName,
+        parseFloat(kadar_gula) || 0,
+        parseFloat(kalori)     || 0,
         status     || "Normal",
-        time_eaten || new Date().toTimeString().slice(0, 5),
-        diary_date || new Date().toISOString().split("T")[0],
+        time_eaten || getLocalTimeString(),
+        diary_date || getLocalDateString(),
       ]
     );
 
