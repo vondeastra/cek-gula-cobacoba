@@ -1,4 +1,5 @@
 from fastapi import FastAPI, UploadFile, File
+from fastapi.middleware.cors import CORSMiddleware
 import tensorflow as tf
 from tensorflow.keras import layers
 import numpy as np
@@ -9,6 +10,15 @@ import pandas as pd
 from groq_helper import get_rekomendasi
 
 app = FastAPI()
+
+# Izinkan akses dari browser / frontend (CORS)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 CLASS_NAMES = [
     'ampyang',
