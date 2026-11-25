@@ -10,8 +10,8 @@ function NotFoundPage() {
       {/* Kanopi Tenda Lapak */}
       <div className="canopy-stripes h-2.5 w-full border-b border-[#5E2A0B]"></div>
 
-      <div className="flex-1 flex flex-col items-center justify-center px-4 py-8">
-        <div className="w-full max-w-md mb-3 flex justify-start">
+      <div className="flex-1 flex flex-col items-center justify-center px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+        <div className="w-full max-w-lg mb-3 flex justify-start">
           <button
             type="button"
             onClick={() => navigate(-1)}
@@ -23,10 +23,10 @@ function NotFoundPage() {
           </button>
         </div>
 
-        <div className="w-full max-w-md daun-card p-8 sm:p-10 text-center relative overflow-hidden bg-[#FFFDF9] shadow-xl">
+        <div className="w-full max-w-lg daun-card p-6 sm:p-10 text-center relative overflow-hidden bg-[#FFFDF9] shadow-xl border-2 border-[#D8C2A4]">
           <DaunPisangCorner position="top-right" />
 
-          <div className="w-20 h-20 rounded-full bg-[#FFF8EC] border-2 border-[#E8D9C5] flex items-center justify-center text-4xl mx-auto mb-4 text-[#8C4318]">
+          <div className="w-18 h-18 sm:w-20 sm:h-20 rounded-full bg-[#FFF8EC] border-2 border-[#E8D9C5] flex items-center justify-center text-3xl sm:text-4xl mx-auto mb-4 text-[#8C4318]">
             <MdStorefront size={38} />
           </div>
 
@@ -34,28 +34,28 @@ function NotFoundPage() {
             404
           </span>
 
-          <h1 className="font-display font-black text-2xl text-[#3B2A1A] mb-2">
+          <h1 className="font-display font-black text-2xl sm:text-3xl text-[#3B2A1A] mb-2">
             Waduh, Lapaknya Belum Buka!
           </h1>
 
-          <p className="text-xs sm:text-sm text-[#745F4B] max-w-xs mx-auto mb-8 leading-relaxed">
-            Halaman jajanan yang kamu cari tidak ditemukan atau sudah pindah lapak. Ayo kembali ke beranda pasar!
+          <p className="text-xs sm:text-base text-[#745F4B] max-w-md mx-auto mb-6 sm:mb-8 leading-relaxed">
+            Halaman jajanan yang kamu cari tidak ditemukan atau sudah pindah lapak. Ayo kembali ke beranda pasar atau tilik kue favoritmu!
           </p>
 
-          <div className="flex flex-col gap-3">
+          <div className="flex flex-col sm:flex-row gap-3">
             <button
               onClick={() => navigate(-1)}
-              className="btn-pasar-secondary w-full py-3 text-sm font-bold shadow-xs flex items-center justify-center gap-2"
+              className="btn-pasar-secondary flex-1 py-3.5 text-xs sm:text-sm font-bold shadow-xs flex items-center justify-center gap-2 cursor-pointer"
             >
               <MdArrowBack size={18} />
-              <span>Kembali ke Halaman Sebelumnya</span>
+              <span>Halaman Sebelumnya</span>
             </button>
             <button
               onClick={() => navigate('/')}
-              className="btn-pasar-primary w-full py-3.5 text-sm font-bold shadow-md flex items-center justify-center gap-2"
+              className="btn-pasar-primary flex-1 py-3.5 text-xs sm:text-sm font-bold shadow-md flex items-center justify-center gap-2 cursor-pointer"
             >
               <MdHome size={18} />
-              <span>Kembali ke Beranda Lapak</span>
+              <span>Beranda Lapak</span>
             </button>
           </div>
         </div>
